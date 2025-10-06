@@ -1,27 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TicketService } from '@/lib/ticket-service';
-import { Event, EventStats } from '@/types';
+import { Event, EventStats, TicketWithDetails } from '@/types';
 
 export default function AdminDashboard() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [stats, setStats] = useState<EventStats | null>(null);
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<TicketWithDetails[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
-  useEffect(() => {
-    if (selectedEventId) {
-      loadEventData(selectedEventId);
-    }
-  }, [selectedEventId]);
-
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     try {
       const eventsData = await TicketService.getEvents();
       setEvents(eventsData);
@@ -33,7 +23,17 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error cargando eventos:', error);
     }
-  };
+  }, [selectedEventId]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
+
+  useEffect(() => {
+    if (selectedEventId) {
+      loadEventData(selectedEventId);
+    }
+  }, [selectedEventId]);
 
   const loadEventData = async (eventId: string) => {
     setLoading(true);
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const getStatusBadge = (ticket: any) => {
+  const getStatusBadge = (ticket: TicketWithDetails) => {
     if (ticket.is_used) {
       return (
         <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
