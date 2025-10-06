@@ -4,22 +4,23 @@ import { useState } from 'react';
 import { useRef } from 'react';
 import { TicketService } from '@/lib/ticket-service';
 import { supabase } from '@/lib/supabase';
+import { TicketWithDetails } from '@/types';
 
 export default function QRScanner() {
   const [scannedCode, setScannedCode] = useState('');
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [validationResult, setValidationResult] = useState<TicketWithDetails | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [validationHistory, setValidationHistory] = useState<any[]>([]);
+  const [validationHistory, setValidationHistory] = useState<(TicketWithDetails & { validatedAt: string })[]>([]);
   const [showAssignForm, setShowAssignForm] = useState(false);
-  const [unassignedTicket, setUnassignedTicket] = useState<any>(null);
+  const [unassignedTicket, setUnassignedTicket] = useState<TicketWithDetails | null>(null);
   const [guestData, setGuestData] = useState({
     name: '',
     email: '',
     phone: ''
   });
   const [assignLoading, setAssignLoading] = useState(false);
-  const html5QrRef = useRef<any>(null);
+  const html5QrRef = useRef<{ stop: () => Promise<void>; clear: () => void } | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
 
   const handleScan = async () => {
@@ -94,8 +95,9 @@ export default function QRScanner() {
       // Limpiar el campo
       setScannedCode('');
       
-    } catch (err: any) {
-      setError(err.message || 'Error validando ticket');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error validando ticket';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -133,12 +135,13 @@ export default function QRScanner() {
           // detener la cámara tras leer
           stopCameraScanner();
         },
-        (errorMsg: any) => {
+        (errorMsg: string) => {
           // ignore temporary decode errors
         }
       );
-    } catch (err: any) {
-      setError('No se pudo acceder a la cámara: ' + (err.message || String(err)));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError('No se pudo acceder a la cámara: ' + errorMessage);
       setCameraActive(false);
     }
   };
@@ -147,7 +150,7 @@ export default function QRScanner() {
     if (!html5QrRef.current) return;
     try {
       await html5QrRef.current.stop();
-      await html5QrRef.current.clear();
+      html5QrRef.current.clear();
     } catch (e) {
       // ignore
     }
@@ -185,8 +188,9 @@ export default function QRScanner() {
       setUnassignedTicket(null);
       setGuestData({ name: '', email: '', phone: '' });
       
-    } catch (err: any) {
-      setError(err.message || 'Error asignando ticket');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error asignando ticket';
+      setError(errorMessage);
     } finally {
       setAssignLoading(false);
     }

@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { TicketService } from '@/lib/ticket-service';
-import { Event, TicketType } from '@/types';
+import { Event, TicketType, Ticket } from '@/types';
 
 interface TicketGeneratorProps {
   eventId?: string;
+}
+
+interface GeneratedTicket extends Ticket {
+  qrCode: string;
+  events?: Pick<Event, 'name' | 'date' | 'location'>;
+  ticket_types?: Pick<TicketType, 'name' | 'price'>;
 }
 
 export default function TicketGenerator({ eventId: initialEventId }: TicketGeneratorProps) {
@@ -21,7 +27,7 @@ export default function TicketGenerator({ eventId: initialEventId }: TicketGener
     phone: ''
   });
   const [loading, setLoading] = useState(false);
-  const [generatedTickets, setGeneratedTickets] = useState<any[]>([]);
+  const [generatedTickets, setGeneratedTickets] = useState<GeneratedTicket[]>([]);
 
   useEffect(() => {
     loadEvents();
@@ -64,7 +70,7 @@ export default function TicketGenerator({ eventId: initialEventId }: TicketGener
     }
 
     setLoading(true);
-    const newTickets: any[] = [];
+    const newTickets: GeneratedTicket[] = [];
 
     try {
       for (let i = 0; i < quantity; i++) {
@@ -103,7 +109,7 @@ export default function TicketGenerator({ eventId: initialEventId }: TicketGener
     }
   };
 
-  const downloadTicket = (ticket: any) => {
+  const downloadTicket = (ticket: GeneratedTicket) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
