@@ -23,8 +23,33 @@ export default function QRScanner() {
   const html5QrRef = useRef<{ stop: () => Promise<void>; clear: () => void } | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
 
-  const handleScan = async () => {
-    if (!scannedCode.trim()) {
+  const handleScan = (rawValue: string | null) => {
+    if (!rawValue) return;
+
+    // Elimina comillas y metadatos si existen
+    let cleanedValue = rawValue.trim();
+
+    // Si el valor está entre comillas, quítalas
+    if (cleanedValue.startsWith('"') && cleanedValue.endsWith('"')) {
+      cleanedValue = cleanedValue.slice(1, -1);
+    }
+
+    // Si hay metadatos, por ejemplo en formato JSON, intenta extraer el código
+    try {
+      const maybeJson = JSON.parse(cleanedValue);
+      if (maybeJson && maybeJson.code) {
+        cleanedValue = maybeJson.code;
+      }
+    } catch {
+      // No es JSON, continuar con el valor limpio
+    }
+
+    // Ahora valida el código limpio
+    validateTicket(cleanedValue);
+  };
+
+  const validateTicket = async (ticketCode: string) => {
+    if (!ticketCode.trim()) {
       setError('Por favor ingresa un código QR');
       return;
     }
@@ -35,17 +60,8 @@ export default function QRScanner() {
     setShowAssignForm(false);
 
     try {
-      let ticketCode = scannedCode.trim();
+      ticketCode = ticketCode.trim();
       
-      // Intentar parsear como JSON (formato completo del QR)
-      try {
-        const qrData = JSON.parse(scannedCode);
-        if (qrData.type === 'ticket' && qrData.code) {
-          ticketCode = qrData.code;
-        }
-      } catch {
-        // Si no es JSON, asumir que es el código directo
-      }
 
       // Primero obtener la información del ticket sin validarlo
       const { data: ticketInfo, error: ticketError } = await supabase
@@ -105,7 +121,7 @@ export default function QRScanner() {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleScan();
+      handleScan(scannedCode);
     }
   };
 
@@ -131,7 +147,7 @@ export default function QRScanner() {
         async (decodedText: string) => {
           // cuando se detecta un QR, setear el campo y validar
           setScannedCode(decodedText);
-          await handleScan();
+          await handleScan(decodedText);
           // detener la cámara tras leer
           stopCameraScanner();
         },
@@ -229,7 +245,7 @@ export default function QRScanner() {
                   type="text"
                   value={scannedCode}
                   onChange={(e) => setScannedCode(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   placeholder="Escanea el QR o pega el código aquí..."
                   className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 font-mono"
                   autoFocus
@@ -253,7 +269,7 @@ export default function QRScanner() {
 
               <div className="flex space-x-3">
                 <button
-                  onClick={handleScan}
+                  onClick={() => handleScan(scannedCode)}
                   disabled={loading || !scannedCode.trim()}
                   className="flex-1 bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
