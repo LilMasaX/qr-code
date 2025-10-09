@@ -111,7 +111,7 @@ export class TicketService {
       throw new Error('Ticket no encontrado');
     }
 
-    if (ticket.is_used) {
+    if (ticket.uses_count >= ticket.max_uses) {
       throw new Error('Ticket ya ha sido utilizado');
     }
 
@@ -127,7 +127,7 @@ export class TicketService {
     const { error: updateError } = await supabase
       .from('tickets')
       .update({
-        is_used: true,
+        uses_count: ticket.uses_count + 1,
         used_at: new Date().toISOString()
       })
       .eq('id', ticket.id);

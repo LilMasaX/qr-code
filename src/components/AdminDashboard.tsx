@@ -59,7 +59,7 @@ export default function AdminDashboard() {
   };
 
   const getStatusBadge = (ticket: TicketWithDetails) => {
-    if (ticket.is_used) {
+    if (ticket.used_at) {
       return (
         <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
           Utilizada

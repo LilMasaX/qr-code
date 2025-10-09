@@ -78,7 +78,7 @@ export default function QRScanner() {
         throw new Error('Ticket no encontrado');
       }
 
-      if (ticketInfo.is_used) {
+      if (ticketInfo.uses_count >= ticketInfo.max_uses) {
         throw new Error('Ticket ya ha sido utilizado');
       }
 
