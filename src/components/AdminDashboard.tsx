@@ -59,7 +59,7 @@ export default function AdminDashboard() {
   };
 
   const getStatusBadge = (ticket: TicketWithDetails) => {
-    if (ticket.used_at) {
+    if (ticket.uses_count >= ticket.max_uses) {
       return (
         <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
           Utilizada
@@ -212,43 +212,43 @@ export default function AdminDashboard() {
                   {tickets.map((ticket) => (
                     <tr key={ticket.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-black">
-                        {ticket.ticket_code}
-                      </td>
+                          {ticket.ticket_code}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                        {ticket.ticket_types.name}
+                          {ticket.ticket_types.name}
                           <div className="text-xs text-muted">${ticket.ticket_types.price}</div>
-                      </td>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                        {ticket.guest_name || (
+                          {ticket.guest_name || (
                             <span className="text-muted italic">Sin asignar</span>
-                        )}
-                      </td>
+                          )}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                        {ticket.guest_email || (
+                          {ticket.guest_email || (
                             <span className="text-muted italic">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(ticket)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                        {new Date(ticket.created_at).toLocaleDateString()}
-                        <div className="text-xs">
-                          {new Date(ticket.created_at).toLocaleTimeString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                        {ticket.used_at ? (
-                          <>
-                            {new Date(ticket.used_at).toLocaleDateString()}
-                            <div className="text-xs">
-                              {new Date(ticket.used_at).toLocaleTimeString()}
-                            </div>
-                          </>
-                        ) : (
-                          <span className="text-muted italic">-</span>
-                        )}
-                      </td>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(ticket)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                          {new Date(ticket.created_at).toLocaleDateString()}
+                          <div className="text-xs">
+                            {new Date(ticket.created_at).toLocaleTimeString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                          {ticket.uses_count >= ticket.max_uses ? (
+                            <>
+                              {new Date(ticket.updated_at || ticket.created_at).toLocaleDateString()}
+                              <div className="text-xs">
+                                {new Date(ticket.updated_at || ticket.created_at).toLocaleTimeString()}
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-muted italic">-</span>
+                          )}
+                        </td>
                     </tr>
                   ))}
                 </tbody>

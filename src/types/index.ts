@@ -27,8 +27,9 @@ export interface Ticket {
   guest_email?: string;
   guest_phone?: string;
   is_assigned: boolean;
-  is_used: boolean;
-  used_at?: string;
+  uses_count: number;
+  max_uses: number;
+  // used_at?: string; // Eliminado, usar uses_count/max_uses
   created_at: string;
   updated_at: string;
 }

@@ -128,7 +128,7 @@ export class TicketService {
       .from('tickets')
       .update({
         uses_count: ticket.uses_count + 1,
-        used_at: new Date().toISOString()
+  // used_at: new Date().toISOString(), // Eliminado, usar uses_count/max_uses
       })
       .eq('id', ticket.id);
 
