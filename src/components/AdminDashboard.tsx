@@ -83,7 +83,7 @@ export default function AdminDashboard() {
   const selectedEvent = events.find(e => e.id === selectedEventId);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-6 text-black">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-black">Panel de Administración</h1>
         <button
